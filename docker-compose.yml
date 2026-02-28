@@ -1,0 +1,21 @@
+version: "3.9"
+
+services:
+
+  backend:
+    build: ./backend
+    container_name: factory-backend
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./backend/prisma:/app/prisma
+    environment:
+      - DATABASE_URL=file:./dev.db
+
+  frontend:
+    build: ./frontend
+    container_name: factory-frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
