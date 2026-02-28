@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:4000/api";
+const API_BASE = "https://ai-worker-productivity-dashboard-getg.onrender.com";
 
 export async function getWorkerMetrics() {
   const res = await fetch(`${BASE_URL}/metrics/workers`);
