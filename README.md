@@ -1,35 +1,52 @@
-AI-Powered Worker Productivity Dashboard
+# AI-Powered Worker Productivity Dashboard
 
-Overview
+## Overview
 
-This project is a full-stack web application that ingests AI-generated worker activity events from CCTV computer vision systems and displays productivity metrics for a factory environment.
+The AI-Powered Worker Productivity Dashboard is a full-stack web application that simulates how AI-enabled CCTV systems monitor worker activity and generate productivity insights in a manufacturing environment.
 
-The system simulates a manufacturing setup with:
-
-- 6 Workers
-- 6 Workstations
-- AI-generated activity events
-- Productivity metrics dashboard
+The system ingests structured events produced by computer vision models (e.g., working, idle, absent, product_count) and computes actionable metrics at the worker, workstation, and factory levels.
 
 The application is containerized using Docker and can be run locally with a single command.
 
 ---
 
-Architecture: Edge → Backend → Dashboard
+## Features
 
-1. Edge Layer (AI Cameras)
+- AI activity event ingestion API
+- Worker productivity metrics calculation
+- Workstation utilization metrics
+- Factory-level summary dashboard
+- Dummy data simulation
+- RESTful backend architecture
+- Modern React frontend (Vite)
+- Dockerized full-stack setup
 
-AI-powered CCTV cameras perform computer vision inference at the edge and generate structured events such as:
+---
+
+## System Architecture
+
+AI Cameras (Edge Layer)  
+↓  
+Backend API (Node.js + Express + Prisma)  
+↓  
+Database (SQLite)  
+↓  
+Frontend Dashboard (React + Vite)
+
+---
+
+## AI Event Simulation
+
+AI-powered CCTV cameras generate structured events such as:
 
 - working
 - idle
 - absent
 - product_count
 
-These events are sent to the backend through REST APIs.
-
 Example event:
 
+```json
 {
   "timestamp": "2026-01-15T10:15:00Z",
   "worker_id": "W1",
@@ -38,57 +55,45 @@ Example event:
   "confidence": 0.93,
   "count": 1
 }
+```
 
 ---
 
-2. Backend Layer
+## Tech Stack
 
-Responsibilities:
-
-- Event ingestion API
-- Database storage (SQLite using Prisma ORM)
-- Productivity metric computation
-- Dummy data seeding
-- APIs for dashboard
-
-Tech Stack:
+### Backend
 
 - Node.js
 - Express.js
 - Prisma ORM
 - SQLite
 
----
-
-3. Dashboard Layer
-
-Frontend displays:
-
-- Factory-level summary
-- Worker metrics
-- Workstation metrics
-- Filtering and visualization
-
-Tech Stack:
+### Frontend
 
 - React
 - Vite
+- Axios
+
+### DevOps
+
+- Docker
+- Docker Compose
 
 ---
 
-Database Schema
+## Database Schema
 
-Workers
+### Workers
 
 - worker_id (Primary Key)
 - name
 
-Workstations
+### Workstations
 
 - workstation_id (Primary Key)
 - name
 
-Events
+### Events
 
 - id (Primary Key)
 - timestamp
@@ -100,30 +105,28 @@ Events
 
 ---
 
-Metrics Definitions
+## Metrics Definitions
 
-Worker Metrics
+### Worker Metrics
 
-- Active Time
-  Time between consecutive "working" events.
-
-- Idle Time
-  Time between consecutive "idle" events.
-
+- Active Time — Time spent in working state
+- Idle Time — Time spent idle
 - Utilization %
 
+```
 active_time / (active_time + idle_time) * 100
+```
 
-- Units Produced
-  Sum of count from product_count events.
-
+- Units Produced — Sum of product_count events
 - Units per Hour
 
+```
 units / active_hours
+```
 
 ---
 
-Workstation Metrics
+### Workstation Metrics
 
 - Occupancy Time
 - Utilization Percentage
@@ -132,131 +135,126 @@ Workstation Metrics
 
 ---
 
-Factory Metrics
+### Factory Metrics
 
 - Total productive time
 - Total production count
-- Average utilization across workers
+- Average utilization
 - Average production rate
 
 ---
 
-Assumptions
+## Running Locally with Docker
 
-- Events are sorted by timestamp before metric calculations.
-- Duration is computed using time difference between consecutive events.
-- product_count events contribute only to production metrics.
-- Confidence values are stored but not filtered in current version.
+### Prerequisites
 
----
+- Docker Desktop installed
 
-Handling Real-World Challenges
+### Run Application
 
-Intermittent Connectivity
-
-- Edge devices can buffer events locally.
-- Backend APIs are idempotent.
-- Retry mechanisms can be implemented using message queues (Kafka / MQTT).
-
-Duplicate Events
-
-- Can be handled using unique event IDs or hashing.
-- Future improvement: deduplication layer before DB insert.
-
-Out-of-Order Timestamps
-
-- Events are sorted before metric computation.
+```bash
+docker compose up --build
+```
 
 ---
 
-Model Versioning
+## Access Application
 
-Each event can include:
+Frontend:
 
-- model_version
-- camera_id
+```
+http://localhost:5173
+```
 
-This enables tracking which AI model generated the event.
+Backend:
 
----
-
-Model Drift Detection
-
-Possible approaches:
-
-- Monitor confidence score distribution over time
-- Compare predicted production vs actual output
-- Statistical anomaly detection
+```
+http://localhost:4000
+```
 
 ---
 
-Retraining Strategy
+## Project Structure
 
-Retraining can be triggered when:
-
-- Accuracy drops below threshold
-- Drift detected
-- New labeled data available
+```
+TechnicalAssessment/
+│── backend/
+│   ├── config/
+│   ├── controllers/
+│   ├── routes/
+│   ├── services/
+│   ├── utils/
+│   ├── prisma/
+│   ├── index.js
+│   └── Dockerfile
+│
+│── frontend/
+│   ├── src/
+│   └── Dockerfile
+│
+│── docker-compose.yml
+│── README.md
+```
 
 ---
 
-Scalability Strategy
+## Handling Real-World Challenges
 
-Scaling Cameras (5 → 100+)
+### Intermittent Connectivity
+
+- Edge devices buffer events locally
+- Backend APIs are idempotent
+- Retry possible via queues (Kafka / MQTT)
+
+### Duplicate Events
+
+- Can be solved using unique event IDs
+- Future improvement: deduplication layer
+
+### Out-of-Order Events
+
+- Events sorted before metric computation
+
+---
+
+## Scalability Strategy
+
+### Scaling Cameras (5 → 100+)
 
 - Introduce message queue (Kafka / RabbitMQ)
 - Stream processing pipeline
 - Horizontal backend scaling
 - Load balancing
 
-Multi-Site Deployment
+### Multi-Site Deployment
 
 - Add site_id dimension
-- Use cloud database (PostgreSQL)
+- Cloud database (PostgreSQL)
 - Microservices architecture
 - Central monitoring dashboard
 
 ---
 
-Running Locally with Docker
+## Tradeoffs
 
-Requirements
-
-- Docker Desktop
-
-Run Application
-
-docker compose up --build
-
-Frontend:
-
-http://localhost:3000
-
-Backend:
-
-http://localhost:4000
+- SQLite used for simplicity instead of production DB
+- Metrics computed on request instead of pre-aggregation
+- Minimal UI to focus on core functionality
+- No authentication layer included
 
 ---
 
-Tradeoffs
+## Future Improvements
 
-- SQLite chosen for simplicity instead of production DB.
-- Metrics computed on request instead of pre-aggregation.
-- Minimal UI for faster development.
-- No authentication layer included.
-
----
-
-Future Improvements
-
-- Real-time streaming with WebSockets
+- Real-time streaming using WebSockets
 - Authentication & authorization
-- Historical analytics
-- Alerting system
-- Predictive analytics using ML
+- Historical analytics dashboards
+- Alerting & anomaly detection
+- Predictive analytics using ML models
 
 ---
 
-Author
+## Author
 
-AI Worker Productivity Dashboard — Technical Assessment
+Technical Assessment Submission  
+AI Worker Productivity Dashboard
